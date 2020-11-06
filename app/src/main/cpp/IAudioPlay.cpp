@@ -6,6 +6,25 @@
 #include "XLog.h"
 
 
+XData IAudioPlay::GetData()
+{
+    XData d;
+    while (!isExit)
+    {
+        frameMutex.lock();
+        if(!frames.empty())
+        {
+            d = frames.front();
+            frames.pop_front();
+            frameMutex.unlock();
+            return d;
+        }
+        frameMutex.unlock();
+        XSleep(1);
+    }
+    return d;
+}
+
 void IAudioPlay::Update(XData data)
 {
     XLOGE("IAudioPlay::Update %d",data.size);
@@ -15,7 +34,7 @@ void IAudioPlay::Update(XData data)
     while (!isExit)
     {
         frameMutex.lock();
-        if(frames.size() < maxFrame)
+        if(frames.size() > maxFrame)    //<画面不动 声音没有
         {
             frameMutex.unlock();
             XSleep(1);
